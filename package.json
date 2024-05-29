@@ -6,9 +6,10 @@
     "prettier": "^3.2.5"
   },
   "scripts": {
-    "simulate": "source .env && node ./functions/simulators/alpacaMintSimulator.js",
+    "simulate": " node ./functions/simulators/alpacaMintSimulator.js",
+    "simulateGet": "node ./functions/simulators/getUserSimulator.js",
     "mint": "source .env && node ./functions/simulators/alpacaMintSimulator.js",
     "redeem": "source .env && node ./functions/simulators/alpacaRedeemSimulator.js",
-    "uploadSecrets": "source .env && node ./functions/uploadSecrets.js"
+    "uploadSecrets": "node ./functions/uploadSecrets.js"
   }
 }

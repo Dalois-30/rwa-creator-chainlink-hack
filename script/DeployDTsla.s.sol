@@ -43,7 +43,6 @@ contract DeployDTsla is Script {
             address redemptionCoin,
             ,
             ,
-            ,
             uint64 secretVersion,
             uint8 secretSlot
         ) = helperConfig.activeNetworkConfig();

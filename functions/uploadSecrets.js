@@ -25,7 +25,8 @@ const uploadSecrets = async () => {
     if (!rpcUrl)
         throw new Error(`rpcUrl not provided  - check your environment variables`)
 
-    const secrets = { alpacaKey: process.env.ALPACA_KEY ?? "", alpacaSecret: process.env.ALPACA_SECRET ?? "" }
+    const secrets = { tokenKey: process.env.TOKEN_KEY ?? "", alpacaKey: process.env.ALPACA_KEY ?? "", alpacaSecret: process.env.ALPACA_SECRET ?? ""  }
+    // const secrets = { alpacaKey: process.env.ALPACA_KEY ?? "", alpacaSecret: process.env.ALPACA_SECRET ?? "" }
     const provider = new ethers.providers.JsonRpcProvider(rpcUrl)
     const wallet = new ethers.Wallet(privateKey)
     const signer = wallet.connect(provider) // create ethers signer for signing transactions
@@ -65,6 +66,7 @@ const uploadSecrets = async () => {
 
     const donHostedSecretsVersion = parseInt(uploadResult.version) // fetch the reference of the encrypted secrets
     console.log(`\n✅ Secrets version: ${donHostedSecretsVersion}`)
+    console.log("\n✅ UploadResult: ", uploadResult)
 
 }
 
