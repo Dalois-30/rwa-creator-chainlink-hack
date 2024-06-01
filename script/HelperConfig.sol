@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.25;
 
-import { MockV3Aggregator } from "../src/test/mocks/MockV3Aggregator.sol";
-import { MockFunctionsRouter } from "../src/test/mocks/MockFunctionsRouter.sol";
-import { MockUSDC } from "../src/test/mocks/MockUSDC.sol";
-import { MockCCIPRouter } from "@chainlink/contracts-ccip/src/v0.8/ccip/test/mocks/MockRouter.sol";
-import { MockLinkToken } from "../src/test/mocks/MockLinkToken.sol";
+// import { MockV3Aggregator } from "../src/test/mocks/MockV3Aggregator.sol";
+// import { MockFunctionsRouter } from "../src/test/mocks/MockFunctionsRouter.sol";
+// import { MockUSDC } from "../src/test/mocks/MockUSDC.sol";
+// import { MockCCIPRouter } from "@chainlink/contracts-ccip/src/v0.8/ccip/test/mocks/MockRouter.sol";
+// import { MockLinkToken } from "../src/test/mocks/MockLinkToken.sol";
 
 contract HelperConfig {
     NetworkConfig public activeNetworkConfig;
@@ -29,15 +29,15 @@ contract HelperConfig {
 
     mapping(uint256 => NetworkConfig) public chainIdToNetworkConfig;
 
-    // Mocks
-    MockV3Aggregator public tslaFeedMock;
-    MockV3Aggregator public ethUsdFeedMock;
-    MockV3Aggregator public usdcFeedMock;
-    MockUSDC public usdcMock;
-    MockLinkToken public linkTokenMock;
-    MockCCIPRouter public ccipRouterMock;
+    // // Mocks
+    // MockV3Aggregator public tslaFeedMock;
+    // MockV3Aggregator public ethUsdFeedMock;
+    // MockV3Aggregator public usdcFeedMock;
+    // MockUSDC public usdcMock;
+    // MockLinkToken public linkTokenMock;
+    // MockCCIPRouter public ccipRouterMock;
 
-    MockFunctionsRouter public functionsRouterMock;
+    // MockFunctionsRouter public functionsRouterMock;
 
     // TSLA USD, ETH USD, and USDC USD both have 8 decimals
     uint8 public constant DECIMALS = 8;
@@ -47,8 +47,8 @@ contract HelperConfig {
     constructor() {
         // chainIdToNetworkConfig[137] = getPolygonConfig();
         // chainIdToNetworkConfig[80_001] = getMumbaiConfig();
-        chainIdToNetworkConfig[31_337] = _setupAnvilConfig();
-        activeNetworkConfig = chainIdToNetworkConfig[block.chainid];
+        // chainIdToNetworkConfig[31_337] = _setupAnvilConfig();
+        activeNetworkConfig = chainIdToNetworkConfig[11155111];
     }
 
     function getSepoliaConfig() internal pure returns (NetworkConfig memory config) {
@@ -72,33 +72,33 @@ contract HelperConfig {
         // https://alpaca.markets/support/crypto-wallet-faq
     }
 
-    function getAnvilEthConfig() internal view returns (NetworkConfig memory anvilNetworkConfig) {
-        anvilNetworkConfig = NetworkConfig({
-            tslaPriceFeed: address(tslaFeedMock),
-            usdcPriceFeed: address(tslaFeedMock),
-            ethUsdPriceFeed: address(ethUsdFeedMock),
-            functionsRouter: address(functionsRouterMock),
-            donId: 0x66756e2d706f6c79676f6e2d6d756d6261692d31000000000000000000000000, // Dummy
-            subId: 1, // Dummy non-zero
-            redemptionCoin: address(usdcMock),
-            // linkToken: address(linkTokenMock),
-            ccipRouter: address(ccipRouterMock),
-            ccipChainSelector: 1, // This is a dummy non-zero value
-            secretVersion: 0,
-            secretSlot: 0
-        });
+    // function getAnvilEthConfig() internal view returns (NetworkConfig memory anvilNetworkConfig) {
+    //     anvilNetworkConfig = NetworkConfig({
+    //         tslaPriceFeed: address(tslaFeedMock),
+    //         usdcPriceFeed: address(tslaFeedMock),
+    //         ethUsdPriceFeed: address(ethUsdFeedMock),
+    //         functionsRouter: address(functionsRouterMock),
+    //         donId: 0x66756e2d706f6c79676f6e2d6d756d6261692d31000000000000000000000000, // Dummy
+    //         subId: 1, // Dummy non-zero
+    //         redemptionCoin: address(usdcMock),
+    //         // linkToken: address(linkTokenMock),
+    //         ccipRouter: address(ccipRouterMock),
+    //         ccipChainSelector: 1, // This is a dummy non-zero value
+    //         secretVersion: 0,
+    //         secretSlot: 0
+    //     });
         // minimumRedemptionAmount: 30e6 // Please see your brokerage for min redemption amounts
         // https://alpaca.markets/support/crypto-wallet-faq
-    }
+    // }
 
-    function _setupAnvilConfig() internal returns (NetworkConfig memory) {
-        usdcMock = new MockUSDC();
-        tslaFeedMock = new MockV3Aggregator(DECIMALS, INITIAL_ANSWER);
-        ethUsdFeedMock = new MockV3Aggregator(DECIMALS, INITIAL_ANSWER);
-        usdcFeedMock = new MockV3Aggregator(DECIMALS, INITIAL_ANSWER_USD);
-        functionsRouterMock = new MockFunctionsRouter();
-        ccipRouterMock = new MockCCIPRouter();
-        // linkTokenMock = new MockLinkToken();
-        return getAnvilEthConfig();
-    }
+    // function _setupAnvilConfig() internal returns (NetworkConfig memory) {
+    //     usdcMock = new MockUSDC();
+    //     tslaFeedMock = new MockV3Aggregator(DECIMALS, INITIAL_ANSWER);
+    //     ethUsdFeedMock = new MockV3Aggregator(DECIMALS, INITIAL_ANSWER);
+    //     usdcFeedMock = new MockV3Aggregator(DECIMALS, INITIAL_ANSWER_USD);
+    //     functionsRouterMock = new MockFunctionsRouter();
+    //     ccipRouterMock = new MockCCIPRouter();
+    //     // linkTokenMock = new MockLinkToken();
+    //     return getAnvilEthConfig();
+    // }
 }

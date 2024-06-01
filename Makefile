@@ -4,6 +4,8 @@
 
 DEFAULT_ANVIL_KEY := 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
 
+deploy:; forge script script/DeployDTsla.s.sol --sender 0x34F1AF42413326d1255bf02B5402737C10fFbC6a --account devKey --rpc-url ${SEPOLIA_RPC_URL} --etherscan-api-key ${ETHERSCAN_API_KEY} --verify --broadcast
+
 all: remove install build
 
 # Clean the repo
@@ -40,7 +42,7 @@ simulate :; npm run simulate
 getweth :; cast call TOKEN_BRIDGE_ADDRESS "getWeth()" --rpc-url ${SEPOLIA_RPC_URL} | cut -c 27- | xargs printf "0x%s\n" | cast --to-checksum-address 
 
 setSupportedChain-mumbai :; cast send TOKEN_BRIDGE_ADDRESS "setSupportedChain(uint64,bool)" 16015286601757825753 true  --rpc-url ${MUMBAI_RPC_URL} --account XXX --sender YYY
-setSupportedChain-sepolia :; cast send TOKEN_BRIDGE_ADDRESS "setSupportedChain(uint64,bool)" 12532609583862916517 true --rpc-url ${SEPOLIA_RPC_URL} --account XXX --sender YYY
+setSupportedChain-sepolia :; cast send TOKEN_BRIDGE_ADDRESS "setSupportedChain(uint64,bool)" 12532609583862916517 true --rpc-url ${SEPOLIA_RPC_URL} --account devKey
 
 # Multi-chain deploymetn doesn't work with account/sender yet :/ 
 deploy-bridges :; forge script script/DeployTokenBridges.s.sol --private-key ${PRIVATE_KEY} --verify --broadcast

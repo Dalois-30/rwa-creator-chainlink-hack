@@ -14,10 +14,11 @@ import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
  * @notice This is our contract to make requests to the Alpaca API to mint TSLA-backed dTSLA tokens
  * @dev This contract is meant to be for educational purposes only
  */
-contract dTSLA is FunctionsClient, ConfirmedOwner, ERC20, Pausable {
+contract dAsset is FunctionsClient, ConfirmedOwner, ERC20, Pausable {
     using FunctionsRequest for FunctionsRequest.Request;
     using OracleLib for AggregatorV3Interface;
     using Strings for uint256;
+    using Strings for address;
 
     error dTSLA__NotEnoughCollateral();
     error dTSLA__BelowMinimumRedemption();
@@ -43,8 +44,9 @@ contract dTSLA is FunctionsClient, ConfirmedOwner, ERC20, Pausable {
     // Check to get the router address for your supported network
     // https://docs.chain.link/chainlink-functions/supported-networks
     address s_functionsRouter;
-    string s_mintSource;
-    string s_redeemSource;
+    string s_mintSourceByBalance;
+    string s_redeemAnIncrementSource;
+    string s_decrementSource;
 
     // Check to get the donID for your supported network https://docs.chain.link/chainlink-functions/supported-networks
     bytes32 s_donID;
@@ -54,6 +56,7 @@ contract dTSLA is FunctionsClient, ConfirmedOwner, ERC20, Pausable {
 
     mapping(bytes32 requestId => dTslaRequest request) private s_requestIdToRequest;
     mapping(address user => uint256 amountAvailableForWithdrawal) private s_userToWithdrawalAmount;
+    mapping(address user => uint256 portofoglioBalance) private s_portfolioBalance0fUser;
 
     address public i_tslaUsdFeed;
     address public i_usdcUsdFeed;
@@ -86,8 +89,9 @@ contract dTSLA is FunctionsClient, ConfirmedOwner, ERC20, Pausable {
      */
     constructor(
         uint64 subId,
-        string memory mintSource,
-        string memory redeemSource,
+        string memory mintSourceByBalance,
+        string memory decrementSource,
+        string memory redeemAnIncrementSource,
         address functionsRouter,
         bytes32 donId,
         address tslaPriceFeed,
@@ -100,8 +104,9 @@ contract dTSLA is FunctionsClient, ConfirmedOwner, ERC20, Pausable {
         ConfirmedOwner(msg.sender)
         ERC20("Backed TSLA", "bTSLA")
     {
-        s_mintSource = mintSource;
-        s_redeemSource = redeemSource;
+        s_mintSourceByBalance = mintSourceByBalance;
+        s_redeemAnIncrementSource = redeemAnIncrementSource;
+        s_decrementSource = decrementSource;
         s_functionsRouter = functionsRouter;
         s_donID = donId;
         i_tslaUsdFeed = tslaPriceFeed;
@@ -127,19 +132,20 @@ contract dTSLA is FunctionsClient, ConfirmedOwner, ERC20, Pausable {
      * @dev If you pass 0, that will act just as a way to get an updated portfolio balance
      * @return requestId The ID of the request
      */
-    function sendMintRequest(uint256 amountOfTokensToMint)
+    function sendMintRequest(uint256 amountOfTokensToMint, string memory assetId)
         external
-        onlyOwner
         whenNotPaused
         returns (bytes32 requestId)
     {
-        // they want to mint $100 and the portfolio has $200 - then that's cool
-        if (_getCollateralRatioAdjustedTotalBalance(amountOfTokensToMint) > s_portfolioBalance) {
-            revert dTSLA__NotEnoughCollateral();
-        }
+
         FunctionsRequest.Request memory req;
-        req.initializeRequestForInlineJavaScript(s_mintSource); // Initialize the request with JS code
+        req.initializeRequestForInlineJavaScript(s_mintSourceByBalance); // Initialize the request with JS code
         req.addDONHostedSecrets(s_secretSlot, s_secretVersion);
+        string[] memory args = new string[](2);
+        args[0] = Strings.toHexString(uint256(uint160(msg.sender)), 20);
+        // args[0] = "0x34F1AF42413326d1255bf02B5402737C10fFbC6a";
+        args[1] = assetId;
+        req.setArgs(args);
 
         // Send the request and store the request ID
         requestId = _sendRequest(req.encodeCBOR(), i_subId, GAS_LIMIT, s_donID);
@@ -170,7 +176,7 @@ contract dTSLA is FunctionsClient, ConfirmedOwner, ERC20, Pausable {
 
         // Internal Effects
         FunctionsRequest.Request memory req;
-        req.initializeRequestForInlineJavaScript(s_redeemSource); // Initialize the request with JS code
+        req.initializeRequestForInlineJavaScript(s_redeemAnIncrementSource); // Initialize the request with JS code
         string[] memory args = new string[](2);
         args[0] = amountdTsla.toString();
         // The transaction will fail if it's outside of 2% slippage
@@ -201,11 +207,16 @@ contract dTSLA is FunctionsClient, ConfirmedOwner, ERC20, Pausable {
         override
         whenNotPaused
     {
-        if (s_requestIdToRequest[requestId].mintOrRedeem == MintOrRedeem.mint) {
-            _mintFulFillRequest(requestId, response);
-        } else {
-            _redeemFulFillRequest(requestId, response);
+        s_portfolioBalance = uint256(bytes32(response));
+        uint256 amountOfTokensToMint = s_requestIdToRequest[requestId].amountOfToken;
+
+        if (_getCollateralRatioAdjustedTotalBalance(amountOfTokensToMint) < s_portfolioBalance) {
+            _mint(s_requestIdToRequest[requestId].requester, amountOfTokensToMint);
         }
+
+        // if (amountOfTokensToMint != 0) {
+        //     _mint(s_requestIdToRequest[requestId].requester, amountOfTokensToMint);
+        // }
     }
 
     function withdraw() external whenNotPaused {
@@ -217,6 +228,8 @@ contract dTSLA is FunctionsClient, ConfirmedOwner, ERC20, Pausable {
             revert dTSLA__RedemptionFailed();
         }
     }
+
+    
 
     function pause() external onlyOwner {
         _pause();
@@ -324,5 +337,9 @@ contract dTSLA is FunctionsClient, ConfirmedOwner, ERC20, Pausable {
 
     function getWithdrawalAmount(address user) public view returns (uint256) {
         return s_userToWithdrawalAmount[user];
+    }
+
+    function getMintSource() public view returns (string memory) {
+        return s_mintSourceByBalance;
     }
 }

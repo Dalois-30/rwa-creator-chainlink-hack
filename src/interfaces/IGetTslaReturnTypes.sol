@@ -5,6 +5,7 @@ interface IGetTslaReturnTypes {
     struct GetTslaReturnType {
         uint64 subId;
         string mintSource;
+        string decrementSource;
         string redeemSource;
         address functionsRouter;
         bytes32 donId;

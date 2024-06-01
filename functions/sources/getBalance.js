@@ -9,11 +9,11 @@ if (
 }
 
 const address = args[0] 
-const productId = args[1] 
+const assetId = args[1] 
 
-const getBalanceOfUserProduct = Functions.makeHttpRequest({
+const getBalanceOfUserAsset = Functions.makeHttpRequest({
     method: 'GET',
-    url: `https://chainlink-backend.daltek.tech/stocks/user/stock/${productId}?address=${address}`,
+    url: `https://chainlink-backend.daltek.tech/stocks/user/stock/${assetId}?address=${address}`,
     headers: {
         'accept': 'application/json',
         'content-type': 'application/json',
@@ -22,12 +22,12 @@ const getBalanceOfUserProduct = Functions.makeHttpRequest({
 })
 
 const [response] = await Promise.all([
-    getBalanceOfUserProduct,
+    getBalanceOfUserAsset,
 ])
 const responseStatus = response.status
-console.log(`\nResponse status: ${responseStatus}\n`)
-console.log("Stock get", response.data.data)
-console.log(`\n`)
+// console.log(`\nResponse status: ${responseStatus}\n`)
+// console.log("Stock get", response.data.data)
+// console.log(`\n`)
 const resp = response.data.data
 
 // const [{ id, email, username }] = response.data
