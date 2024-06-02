@@ -37,6 +37,7 @@ if (resp.value < amount) {
 }
 else {
     const quantity = amount / resp.price
+    console.log("Quantity: ", quantity)
     const getBalanceOfUserProduct = Functions.makeHttpRequest({
         method: 'PUT',
         url: `https://chainlink-backend.daltek.tech/stocks/user/decrement`,
