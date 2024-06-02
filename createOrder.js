@@ -1,35 +1,5 @@
-// Sample script to show creating an order works
-
-const axios = require('axios')
-require('dotenv').config()
-
-// returns string: client_order_id, string: orderStatus, int: responseStatus
-async function placeOrder(symbol, qty, side) {
-    const response = await axios({
-        method: 'POST',
-        url: "https://paper-api.alpaca.markets/v2/orders",
-        headers: {
-            'accept': 'application/json',
-            'content-type': 'application/json',
-            'APCA-API-KEY-ID': process.env.ALPACA_KEY,
-            'APCA-API-SECRET-KEY': process.env.ALPACA_SECRET
-        },
-        data: {
-            side: side,
-            type: "market",
-            time_in_force: "gtc",
-            symbol: symbol,
-            qty: qty
-        }
-    })
-
-    const responseStatus = response.status
-    console.log(`\nResponse status: ${responseStatus}\n`)
-    console.log(response.data)
-    console.log(`\n`)
-
-    const { client_order_id, status: orderStatus } = response.data
-    return { client_order_id, orderStatus, responseStatus }
-}
-
-placeOrder("AAPL", 1, "sell")
+// DAsset deployed at: 0xA598E1fCd7C0980b09B760295d96684bc15AA628
+// Redemption deployed at: 0xc64765BE632e80F6A1c2973186C6eFEDF70874a7
+// MintRequest deployed at: 0x04cafB4154efbeBB6b75F2294Dc41F2ACe321A42
+// RedeemRequest deployed at: 0x638c75dF2E4267f03277ceC16B701523962790C6
+// Manager deployed at: 0xa446eb724d4452ee212C1747411DE542703F03aA
