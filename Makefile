@@ -4,7 +4,7 @@
 
 DEFAULT_ANVIL_KEY := 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
 
-deploy:; forge script script/DeployDTsla.s.sol --sender 0x34F1AF42413326d1255bf02B5402737C10fFbC6a --account devKey --rpc-url ${SEPOLIA_RPC_URL} --etherscan-api-key ${ETHERSCAN_API_KEY} --verify --broadcast
+deploy:; forge script script/DeployContracts.s.sol --sender 0x34F1AF42413326d1255bf02B5402737C10fFbC6a --account devKey --rpc-url ${SEPOLIA_RPC_URL} --etherscan-api-key ${ETHERSCAN_API_KEY} --verify --broadcast
 
 all: remove install build
 

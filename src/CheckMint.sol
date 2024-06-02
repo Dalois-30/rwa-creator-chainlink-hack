@@ -153,46 +153,6 @@
 //         return requestId;
 //     }
 
-//     /*
-//      * @notice user sends a Chainlink Functions request to sell TSLA for redemptionCoin
-//      * @notice this will put the redemptionCoin in a withdrawl queue that the user must call to redeem
-//      * 
-//      * @dev Burn dTSLA
-//      * @dev Sell TSLA on brokerage
-//      * @dev Buy USDC on brokerage
-//      * @dev Send USDC to this contract for user to withdraw
-//      * 
-//      * @param amountdTsla - the amount of dTSLA to redeem
-//      */
-//     function sendRedeemRequest(uint256 amountdTsla) external returns (bytes32 requestId) {
-//         // Should be able to just always redeem?
-//         // @audit potential exploit here, where if a user can redeem more than the collateral amount
-//         // Checks
-//         // Remember, this has 18 decimals
-//         uint256 amountTslaInUsdc = getUsdcValueOfUsd(getUsdValueOfTsla(amountdTsla));
-//         if (amountTslaInUsdc < MINIMUM_REDEMPTION_COIN_REDEMPTION_AMOUNT) {
-//             revert dTSLA__BelowMinimumRedemption();
-//         }
-
-//         // Internal Effects
-//         FunctionsRequest.Request memory req;
-//         req.initializeRequestForInlineJavaScript(s_redeemAnIncrementSource); // Initialize the request with JS code
-//         string[] memory args = new string[](2);
-//         args[0] = amountdTsla.toString();
-//         // The transaction will fail if it's outside of 2% slippage
-//         // This could be a future improvement to make the slippage a parameter by someone
-//         args[1] = amountTslaInUsdc.toString();
-//         req.setArgs(args);
-
-//         // Send the request and store the request ID
-//         // We are assuming requestId is unique
-//         requestId = _sendRequest(req.encodeCBOR(), i_subId, GAS_LIMIT, s_donID);
-//         s_requestIdToRequest[requestId] = request(amountdTsla, msg.sender, MintOrRedeem.redeem);
-
-//         // External Interactions
-//         _burn(msg.sender, amountdTsla);
-//     }
-
 //     /**
 //      * @notice Callback function for fulfilling a request
 //      * @param requestId The ID of the request to fulfill
@@ -206,22 +166,7 @@
 //         internal
 //         override
 //     {
-//         // if (s_requestIdToRequest[requestId].mintOrRedeem == MintOrRedeem.mint) {
-//         //     _mintFulFillRequest(requestId, response);
-//         // } else {
-//         //     _redeemFulFillRequest(requestId, response);
-//         // }
-//         s_portfolioBalance = uint256(bytes32(response));
-//         uint256 amountOfTokensToMint = s_requestIdToRequest[requestId].amountOfToken;
-//         s_portfolioBalance = uint256(bytes32(response));
 
-//         if (_getCollateralRatioAdjustedTotalBalance(amountOfTokensToMint) > s_portfolioBalance) {
-//             revert dTSLA__NotEnoughCollateral();
-//         }
-
-//         if (amountOfTokensToMint != 0) {
-//             _mint(s_requestIdToRequest[requestId].requester, amountOfTokensToMint);
-//         }
 //     }
 
 //     function withdraw() external {
@@ -247,19 +192,7 @@
 //     /*//////////////////////////////////////////////////////////////
 //                                 INTERNAL
 //     //////////////////////////////////////////////////////////////*/
-//     function _mintFulFillRequest(bytes32 requestId, bytes memory response) internal {
-//         uint256 amountOfTokensToMint = s_requestIdToRequest[requestId].amountOfToken;
-//         s_portfolioBalance = uint256(bytes32(response));
 
-//         if (_getCollateralRatioAdjustedTotalBalance(amountOfTokensToMint) > s_portfolioBalance) {
-//             revert dTSLA__NotEnoughCollateral();
-//         }
-
-//         if (amountOfTokensToMint != 0) {
-//             _mint(s_requestIdToRequest[requestId].requester, amountOfTokensToMint);
-//         }
-//         // Do we need to return anything?
-//     }
 
 //     /*
 //      * @notice the callback for the redeem request
