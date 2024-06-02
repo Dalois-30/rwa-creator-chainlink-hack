@@ -25,13 +25,13 @@ const [response] = await Promise.all([
     getBalanceOfUserAsset,
 ])
 const responseStatus = response.status
-// console.log(`\nResponse status: ${responseStatus}\n`)
-// console.log("Stock get", response.data.data)
+console.log(`\nResponse status: ${responseStatus}\n`)
+console.log("Stock get", response.data.data)
 // console.log(`\n`)
-const resp = response.data.data
+const resp = response.data.data.value
 
 // const [{ id, email, username }] = response.data
-return Functions.encodeUint256(resp)
+return Functions.encodeUint256(Math.round(resp * 1000000000000000000))
 // return [{ id, email, username }]
 
 

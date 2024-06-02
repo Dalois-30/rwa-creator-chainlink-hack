@@ -1,15 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.25;
 
-import { FunctionsClient } from "@chainlink/contracts/src/v0.8/functions/dev/v1_0_0/FunctionsClient.sol";
-import { ConfirmedOwner } from "@chainlink/contracts/src/v0.8/shared/access/ConfirmedOwner.sol";
-import { FunctionsRequest } from "@chainlink/contracts/src/v0.8/functions/dev/v1_0_0/libraries/FunctionsRequest.sol";
-import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
-import { DAsset } from "./DAsset.sol";
+import {FunctionsClient} from "@chainlink/contracts/src/v0.8/functions/dev/v1_0_0/FunctionsClient.sol";
+import {ConfirmedOwner} from "@chainlink/contracts/src/v0.8/shared/access/ConfirmedOwner.sol";
+import {FunctionsRequest} from "@chainlink/contracts/src/v0.8/functions/dev/v1_0_0/libraries/FunctionsRequest.sol";
+import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
+import {DAsset} from "./DAsset.sol";
 
 /// @title RedeemRequest - A contract to handle redemption requests for DAsset tokens
 /// @notice This contract allows users to request the redemption of DAsset tokens for a specified redemption coin
+/// @dev Uses Chainlink FunctionsClient to send requests and handle responses
 /// @dev Uses Chainlink FunctionsClient to send requests and handle responses
 /// @author Nguenang Dalois
 contract RedeemRequest is FunctionsClient, ConfirmedOwner {
@@ -100,11 +101,14 @@ contract RedeemRequest is FunctionsClient, ConfirmedOwner {
     /// @notice Sends a request to redeem DAsset tokens
     /// @param amountdTsla The amount of dTSLA tokens to redeem
     /// @return requestId The ID of the request
-    function sendRedeemRequest(uint256 amountdTsla, string memory assetId, address senderAddress)
-        external
-        returns (bytes32 requestId)
-    {
-        uint256 amountTslaInUsdc = s_dAsset.getUsdcValueOfUsd(s_dAsset.getUsdValueOfTsla(amountdTsla));
+    function sendRedeemRequest(
+        uint256 amountdTsla,
+        string memory assetId,
+        address senderAddress
+    ) external returns (bytes32 requestId) {
+        uint256 amountTslaInUsdc = s_dAsset.getUsdcValueOfUsd(
+            s_dAsset.getUsdValueOfTsla(amountdTsla)
+        );
         if (amountTslaInUsdc < MINIMUM_REDEMPTION_COIN_REDEMPTION_AMOUNT) {
             revert dTSLA__BelowMinimumRedemption();
         }
@@ -131,11 +135,10 @@ contract RedeemRequest is FunctionsClient, ConfirmedOwner {
         bytes memory response,
         bytes memory /* err */
     ) internal override {
-        uint256 usdcAmount = uint256(bytes32(response))**18;
-
+        uint256 usdcAmount = uint256(bytes32(response));
+        uint256 amountOfdAssetBurned = s_requestIdToRequest[requestId].amountOfToken;
         if (usdcAmount == 0) {
-            uint256 amountOfdTSLABurned = s_requestIdToRequest[requestId].amountOfToken;
-            s_dAsset.mint(s_requestIdToRequest[requestId].requester, amountOfdTSLABurned);
+            s_dAsset.mint(s_requestIdToRequest[requestId].requester, amountOfdAssetBurned);
             return;
         }
 
@@ -157,5 +160,76 @@ contract RedeemRequest is FunctionsClient, ConfirmedOwner {
     /// @return The amount available for withdrawal
     function getWithdrawalAmount(address user) public view returns (uint256) {
         return s_userToWithdrawalAmount[user];
+    }
+
+    /// @notice Gets the subscription ID
+    /// @return subId The subscription ID
+    function getSubId() external view returns (uint64) {
+        return i_subId;
+    }
+
+    /// @notice Gets the functions router address
+    /// @return functionsRouter The functions router address
+    function getFunctionsRouter() external view returns (address) {
+        return s_functionsRouter;
+    }
+
+    /// @notice Gets the redemption source code
+    /// @return redeemAnIncrementSource The redemption source code
+    function getRedeemRequestSource() external view returns (string memory) {
+        return s_redeemAnIncrementSource;
+    }
+
+    /// @notice Gets the DON ID
+    /// @return donId The DON ID
+    function getDonId() external view returns (bytes32) {
+        return s_donID;
+    }
+
+    /// @notice Gets the secret version
+    /// @return secretVersion The secret version
+    function getSecretVersion() external view returns (uint64) {
+        return s_secretVersion;
+    }
+
+    /// @notice Gets the secret slot
+    /// @return secretSlot The secret slot
+    function getSecretSlot() external view returns (uint8) {
+        return s_secretSlot;
+    }
+
+    /// @notice Gets the DAsset contract address
+    /// @return dAsset The DAsset contract address
+    function getDAsset() external view returns (address) {
+        return address(s_dAsset);
+    }
+
+    /// @notice Gets the redemption coin address
+    /// @return redemptionCoin The redemption coin address
+    function getRedemptionCoin() external view returns (address) {
+        return i_redemptionCoin;
+    }
+
+    /// @notice Gets the redemption coin decimals
+    /// @return redemptionCoinDecimals The redemption coin decimals
+    function getRedemptionCoinDecimals() external view returns (uint256) {
+        return i_redemptionCoinDecimals;
+    }
+
+    /// @notice Gets the redeem request details by request ID
+    /// @param requestId The ID of the request
+    /// @return amountOfToken The amount of tokens
+    /// @return requester The requester address
+    function getRequestDetails(
+        bytes32 requestId
+    ) external view returns (uint256 amountOfToken, address requester) {
+        dTslaRequest memory request = s_requestIdToRequest[requestId];
+        return (request.amountOfToken, request.requester);
+    }
+
+    /// @notice Gets the redeem request address
+    /// @return address the current contract address
+    function getRedeemAddress() external view returns (address) {
+        return address(this);
     }
 }

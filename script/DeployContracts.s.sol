@@ -6,6 +6,7 @@ import { DAsset } from "../src/DAsset.sol";
 import { MintRequest } from "../src/MintRequest.sol";
 import { RedeemRequest } from "../src/RedeemRequest.sol";
 import { Manager } from "../src/ManagerAsset.sol";
+import { MyToken } from "../src/RedemptionToken.sol";
 import {console2} from "forge-std/console2.sol";
 
 contract DeployContracts is Script {
@@ -18,7 +19,7 @@ contract DeployContracts is Script {
     address constant functionsRouter = 0xb83E47C2bC239B3bf370bc41e1459A34b41238D0;
     bytes32 constant donId = 0x66756e2d657468657265756d2d7365706f6c69612d3100000000000000000000;
     uint64 constant subId = 2797;
-    address constant redemptionCoin = 0x9c142E4eAC5D20906eD7549EbdA336010ACc6888;
+    // address constant redemptionCoin = 0x9c142E4eAC5D20906eD7549EbdA336010ACc6888;
     // address constant ccipRouter = 0x0BF3dE8c5D3e8A2B34D2BEeB17ABfCeBaf363A59;
     // string constant ccipChainSelector = 16_015_286_601_757_825_753;
     uint64 constant secretVersion = 1717268889;
@@ -28,6 +29,9 @@ contract DeployContracts is Script {
 
         // Deploy DAsset contract
         DAsset dAsset = new DAsset(tslaPriceFeed, usdcPriceFeed);
+
+        // Deploy Redemption contract
+        MyToken redemptionToken = new MyToken();
 
         // Get sources code
         string memory sourceCode = vm.readFile(mintSourceByBalance);
@@ -52,7 +56,7 @@ contract DeployContracts is Script {
             donId,
             secretVersion,
             secretSlot,
-            redemptionCoin,
+            address(redemptionToken),
             address(dAsset)
         );
 
@@ -60,12 +64,13 @@ contract DeployContracts is Script {
         Manager manager = new Manager();
         
         // Add the asset to the Manager contract
-        manager.addAsset("605ae922-7428-4f81-9ef9-2f8fca8fe836", tslaPriceFeed, usdcPriceFeed, address(mintRequest), address(redeemRequest));
+        manager.addAsset("ASSET", tslaPriceFeed, usdcPriceFeed, address(mintRequest), address(redeemRequest));
 
         vm.stopBroadcast();
 
         // Log the deployed contract addresses
         console2.log("DAsset deployed at:", address(dAsset));
+        console2.log("Redemption deployed at:", address(redemptionToken));
         console2.log("MintRequest deployed at:", address(mintRequest));
         console2.log("RedeemRequest deployed at:", address(redeemRequest));
         console2.log("Manager deployed at:", address(manager));

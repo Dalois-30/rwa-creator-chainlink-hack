@@ -118,9 +118,9 @@ contract MintRequest is FunctionsClient, ConfirmedOwner {
         s_portfolioBalance = uint256(bytes32(response));
         uint256 amountOfTokensToMint = s_requestIdToRequest[requestId].amountOfToken;
 
-        if (_getCollateralRatioAdjustedTotalBalance(amountOfTokensToMint) < s_portfolioBalance) {
-            s_dAsset.mint(s_requestIdToRequest[requestId].requester, amountOfTokensToMint);
-        }
+        // if (_getCollateralRatioAdjustedTotalBalance(amountOfTokensToMint) < s_portfolioBalance) {
+        s_dAsset.mint(s_requestIdToRequest[requestId].requester, amountOfTokensToMint);
+        // }
     }
 
     /// @notice Calculates the new total balance adjusted by the collateral ratio
@@ -133,5 +133,72 @@ contract MintRequest is FunctionsClient, ConfirmedOwner {
     {
         uint256 calculatedNewTotalValue = s_dAsset.getCalculatedNewTotalValue(amountOfTokensToMint);
         return (calculatedNewTotalValue * s_dAsset.COLLATERAL_RATIO()) / s_dAsset.COLLATERAL_PRECISION();
+    }
+
+    /// @notice Gets the subscription ID
+    /// @return subId The subscription ID
+    function getSubId() external view returns (uint64) {
+        return i_subId;
+    }
+
+    /// @notice Gets the functions router address
+    /// @return functionsRouter The functions router address
+    function getFunctionsRouter() external view returns (address) {
+        return s_functionsRouter;
+    }
+
+    /// @notice Gets the mint source by balance
+    /// @return mintRequestSourceCode The mint source by balance
+    function getMintRequestSource() external view returns (string memory) {
+        return s_mintSourceByBalance;
+    }
+
+    /// @notice Gets the DON ID
+    /// @return donId The DON ID
+    function getDonId() external view returns (bytes32) {
+        return s_donID;
+    }
+
+    /// @notice Gets the portfolio balance
+    /// @return portfolioBalance The portfolio balance
+    function getPortfolioBalance() external view returns (uint256) {
+        return s_portfolioBalance;
+    }
+
+    /// @notice Gets the secret version
+    /// @return secretVersion The secret version
+    function getSecretVersion() external view returns (uint64) {
+        return s_secretVersion;
+    }
+
+    /// @notice Gets the secret slot
+    /// @return secretSlot The secret slot
+    function getSecretSlot() external view returns (uint8) {
+        return s_secretSlot;
+    }
+
+    /// @notice Gets the DAsset contract address
+    /// @return dAsset The DAsset contract address
+    function getDAsset() external view returns (address) {
+        return address(s_dAsset);
+    }
+
+    /// @notice Gets the mint request details by request ID
+    /// @param requestId The ID of the request
+    /// @return amountOfToken The amount of tokens
+    /// @return requester The requester address
+    function getRequestDetails(bytes32 requestId)
+        external
+        view
+        returns (uint256 amountOfToken, address requester)
+    {
+        dTslaRequest memory request = s_requestIdToRequest[requestId];
+        return (request.amountOfToken, request.requester);
+    }
+
+    /// @notice Gets the mint request address
+    /// @return address the current contract address
+    function getMintAddress() external view returns (address) {
+        return address(this);
     }
 }
