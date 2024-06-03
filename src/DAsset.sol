@@ -32,7 +32,7 @@ contract DAsset is ERC20, Pausable, ConfirmedOwner {
         ERC20("Backed Asset", "DAsset") 
         ConfirmedOwner(msg.sender) 
     {
-        i_tslaUsdFeed = tslaPriceFeed;
+        i_tslaUsdFeed = tslaPriceFeed; 
         i_usdcUsdFeed = usdcPriceFeed;
     }
 
